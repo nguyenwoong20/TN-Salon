@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TN-Salon | Đặt Lịch Cắt Tóc Phong Cách 30Shine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans">
+
+<nav class="bg-black text-white p-4 sticky top-0 z-50 shadow-lg">
+    <div class="container mx-auto flex justify-between items-center">
+        <div class="text-2xl font-bold tracking-tighter text-yellow-500">TN-SALON</div>
+        <ul class="hidden md:flex space-x-6 uppercase text-sm font-semibold">
+            <li><a href="#" class="hover:text-yellow-500">Trang chủ</a></li>
+            <li><a href="#" class="hover:text-yellow-500 text-yellow-500">Đặt lịch ngay</a></li>
+            <li><a href="#" class="hover:text-yellow-500">Dịch vụ</a></li>
+            <li><a href="#" class="hover:text-yellow-500">Tuyển dụng</a></li>
+        </ul>
+        <button class="bg-yellow-500 text-black px-4 py-1 rounded font-bold hover:bg-yellow-400">ĐĂNG NHẬP</button>
+    </div>
+</nav>
+
+<div class="relative h-64 bg-cover bg-center flex items-center justify-center" style="background-image: url('https://storage.30shine.com/ResourceWeb/data/images/TopSalon/system-salon-bg.jpg');">
+    <div class="absolute inset-0 bg-black opacity-50"></div>
+    <h1 class="relative text-white text-3xl md:text-5xl font-extrabold text-center uppercase tracking-widest">Tìm Salon gần anh nhất</h1>
+</div>
+
+<div class="container mx-auto -mt-16 relative z-10 px-4 pb-20">
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10 max-w-4xl mx-auto border-t-4 border-yellow-500">
+        <h2 class="text-2xl font-bold text-center mb-8 uppercase text-gray-800"><i class="fas fa-calendar-check mr-2"></i> Đặt lịch giữ chỗ</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">Số điện thoại của anh</label>
+                <input type="text" id="phoneInput" placeholder="Nhập số điện thoại để nhận diện..." class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">Chọn dịch vụ</label>
+                <select id="serviceSelect" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none">
+                    <option value="">-- Đang tải dịch vụ... --</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">Chọn Stylist (Thợ)</label>
+                <select id="stylistSelect" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none">
+                    <option value="">-- Đang tải Stylist... --</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">Thời gian cắt</label>
+                <input type="datetime-local" id="startTimeInput" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none">
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <button onclick="bookNow()" class="w-full md:w-1/2 bg-black text-yellow-500 text-xl font-bold py-4 rounded-full hover:bg-gray-900 transition duration-300 shadow-lg uppercase tracking-wider">
+                Xác nhận đặt lịch
+            </button>
+        </div>
+
+        <div id="messageBox" class="mt-6 hidden p-4 rounded-lg text-center font-semibold"></div>
+    </div>
+</div>
+
+<script>
+    // Tự động load dữ liệu khi trang mở
+    document.addEventListener('DOMContentLoaded', () => {
+        loadStylists();
+        loadServices();
+    });
+
+    async function loadStylists() {
+        const res = await fetch('/api/stylists');
+        const data = await res.json();
+        const select = document.getElementById('stylistSelect');
+        select.innerHTML = '<option value="">Chọn thợ bạn yêu thích</option>';
+        data.forEach(s => {
+            select.innerHTML += `<option value="${s.id}">${s.name} (${s.nickname})</option>`;
+        });
+    }
+
+    async function loadServices() {
+        const res = await fetch('/api/services');
+        const data = await res.json();
+        const select = document.getElementById('serviceSelect');
+        select.innerHTML = '<option value="">Chọn combo dịch vụ</option>';
+        data.forEach(s => {
+            select.innerHTML += `<option value="${s.id}">${s.serviceName} - ${s.price.toLocaleString()}đ</option>`;
+        });
+    }
+
+    async function bookNow() {
+        const msgBox = document.getElementById('messageBox');
+        const payload = {
+            customer: { id: 1 }, // Tạm thời mặc định là khách 1, sau này xử lý tìm khách qua Phone
+            stylist: { id: document.getElementById('stylistSelect').value },
+            service: { id: document.getElementById('serviceSelect').value },
+            startTime: document.getElementById('startTimeInput').value,
+            notes: "Đặt qua giao diện Web 30Shine"
+        };
+
+        if (!payload.stylist.id || !payload.service.id || !payload.startTime) {
+            alert("Vui lòng chọn đầy đủ thông tin anh ơi!");
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/appointments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await res.json();
+
+            msgBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+
+            if (res.ok) {
+                msgBox.classList.add('bg-green-100', 'text-green-700');
+                msgBox.innerHTML = `🌟 ĐẶT LỊCH THÀNH CÔNG!<br>Hẹn gặp anh lúc ${new Date(result.startTime).toLocaleString('vi-VN')}`;
+            } else {
+                msgBox.classList.add('bg-red-100', 'text-red-700');
+                msgBox.innerHTML = `⚠️ THÔNG BÁO: ${result.message}`;
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Không kết nối được Server!");
+        }
+    }
+</script>
+</body>
+</html>
