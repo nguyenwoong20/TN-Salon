@@ -1,0 +1,183 @@
+.process {
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+/* Accordion Container */
+.process__accordion {
+  display: flex;
+  gap: var(--space-4);
+  height: 520px;
+  width: 100%;
+  margin-top: var(--space-8);
+}
+
+@media (max-width: 900px) {
+  .process__accordion {
+    flex-direction: column;
+    height: auto;
+    gap: var(--space-4);
+  }
+}
+
+/* Individual Card (Pill Shape) */
+.process__card {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  border-radius: 260px; /* Fixed px radius for perfect pill shape interpolation */
+  overflow: hidden;
+  cursor: pointer;
+  /* Smooth transition matching ebizworld's ease-in-out duration-1000 */
+  transition:
+    flex 0.85s cubic-bezier(0.25, 1, 0.3, 1),
+    border-radius 0.85s cubic-bezier(0.25, 1, 0.3, 1),
+    filter 0.4s ease,
+    box-shadow 0.4s ease;
+  box-shadow: 0 4px 20px oklch(0 0 0 / 0.08);
+  filter: brightness(0.4) grayscale(0.3);
+}
+
+@media (max-width: 900px) {
+  .process__card {
+    height: 140px;
+    border-radius: var(--radius-xl) !important;
+    flex: none !important;
+    filter: brightness(1) grayscale(0) !important;
+  }
+}
+
+/* Dimming non-hovered items */
+.process__card.is-dimmed {
+  filter: brightness(0.25) grayscale(0.5);
+}
+
+/* Active / Hovered Expanded Card */
+.process__card.is-active {
+  flex: 4.8; /* Expands significantly wider just like ebizworld */
+  border-radius: 20px; /* Transitions smoothly from pill (260px) to rounded rectangle (20px) */
+  filter: brightness(1) grayscale(0);
+  box-shadow: 0 20px 48px oklch(0.67 0.20 42 / 0.15);
+}
+
+@media (max-width: 900px) {
+  .process__card.is-active {
+    height: 220px;
+  }
+}
+
+/* Image scaling */
+.process__image-wrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.process__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.85s cubic-bezier(0.25, 1, 0.3, 1);
+}
+
+.process__card.is-active .process__image {
+  transform: scale(1.05);
+}
+
+/* Gradient overlay */
+.process__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    oklch(0.09 0.015 30 / 0.6) 0%,
+    transparent 60%
+  );
+  z-index: 2;
+}
+
+/* Content wrapper (Absolute positioned at the bottom) */
+.process__content {
+  position: absolute;
+  left: var(--space-4);
+  right: var(--space-4);
+  bottom: var(--space-4);
+  z-index: 3;
+  
+  /* Glassmorphic card container matching ebizworld approach */
+  background: rgba(18, 18, 18, 0.65);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: var(--space-5) var(--space-6);
+  
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  
+  /* Text is hidden on collapsed cards */
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+@media (max-width: 900px) {
+  .process__content {
+    opacity: 1 !important;
+    transform: none !important;
+    background: rgba(18, 18, 18, 0.5);
+    border-radius: 12px;
+    padding: var(--space-3) var(--space-4);
+    left: var(--space-3);
+    right: var(--space-3);
+    bottom: var(--space-3);
+  }
+}
+
+/* Show content ONLY when card is active */
+.process__card.is-active .process__content {
+  opacity: 1;
+  transform: translateY(0);
+  /* Delay fade-in until card has expanded a bit */
+  transition:
+    opacity 0.5s ease 0.25s,
+    transform 0.5s ease 0.25s;
+}
+
+/* Step Number */
+.process__step-num {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 900;
+  color: var(--color-brand-light);
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.process__text-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Step Title */
+.process__step-title {
+  font-size: var(--text-base);
+  font-weight: 800;
+  color: white;
+  line-height: 1.3;
+}
+
+/* Description */
+.process__step-desc {
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  margin-top: var(--space-1);
+  max-width: 50ch;
+}

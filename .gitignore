@@ -31,3 +31,13 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Agent Customizations & Configs ###
+.agents
+.gemini
+*.log
+.system_generated/
+*task-*.log
+walkthrough.md
+implementation_plan.md
+task.md

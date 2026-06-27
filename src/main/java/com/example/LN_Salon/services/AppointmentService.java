@@ -48,6 +48,23 @@ public class AppointmentService {
         return appointmentRepository.save(appointment);
     }
 
+    public List<Appointment> findByCustomerId(Long customerId) {
+        com.example.LN_Salon.models.Customer customer = customerRepository
+                .findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
+        return appointmentRepository.findByCustomer(customer);
+    }
+
+    public Appointment cancelAppointment(Long id) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch hẹn"));
+        if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
+            throw new RuntimeException("Lịch hẹn này đã được hủy trước đó");
+        }
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        return appointmentRepository.save(appointment);
+    }
+
     public Appointment createAppointment(Appointment appointment) {
         validateAppointmentInput(appointment);
 
@@ -58,6 +75,10 @@ public class AppointmentService {
         com.example.LN_Salon.models.Stylist stylist = stylistRepository
                 .findById(appointment.getStylist().getId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thợ"));
+
+        if (stylist.getStatus() == com.example.LN_Salon.models.StylistStatus.BUSY) {
+            throw new RuntimeException("Thợ " + stylist.getName() + " hiện không nhận lịch. Vui lòng chọn thợ khác.");
+        }
 
         com.example.LN_Salon.models.Service service = serviceRepository
                 .findById(appointment.getService().getId())
